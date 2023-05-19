@@ -1,0 +1,14 @@
+ARG FROM_IMAGE=netboxcommunity/netbox
+ARG FROM_TAG=v3.4-2.4.0
+ARG FROM=${FROM_IMAGE}:${FROM_TAG}
+FROM ${FROM}
+
+ENV VIRTUAL_ENV=/opt/netbox/venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+COPY ./adestis_netbox_plugin_account_management /source/adestis-netbox-plugin-account-management/adestis_netbox_plugin_account_management/
+COPY ./setup.py /source/adestis-netbox-plugin-account-management/
+COPY ./MANIFEST.in /source/adestis-netbox-plugin-account-management/
+COPY ./README.md /source/adestis-netbox-plugin-account-management/
+
+RUN /opt/netbox/venv/bin/pip install --no-warn-script-location /source/adestis-netbox-plugin-account-management/
