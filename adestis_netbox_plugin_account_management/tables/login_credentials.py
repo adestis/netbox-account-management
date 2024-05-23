@@ -28,4 +28,4 @@ class LoginCredentialsTable(NetBoxTable):
         fields = ['pk', 'id', 'logon_name', 'contact', 'system', 'valid_from', 'valid_to',
                   'login_credentials_status', 'comments', 'actions', 'tags', 'created', 'last_updated']
         default_columns = ['logon_name', 'contact', 'system', 'valid_from', 'valid_to',
-                           'login_credentials_status']
+                           'login_credentials_status', 'tags']

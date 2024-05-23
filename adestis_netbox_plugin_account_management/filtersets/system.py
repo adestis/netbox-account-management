@@ -2,20 +2,19 @@ from adestis_netbox_plugin_account_management.models import *
 from netbox.filtersets import NetBoxModelFilterSet
 from django.db.models import Q
 
-from dcim.models import *
+from dcim.models import Device
 from utilities.filters import TreeNodeMultipleChoiceFilter
 from django.utils.translation import gettext as _
 import django_filters
-from utilities.forms import (
-    DynamicModelMultipleChoiceField, MultipleChoiceField, StaticSelect, TagFilterField, BOOLEAN_WITH_BLANK_CHOICES,
+from utilities.forms.fields import (
+    DynamicModelMultipleChoiceField
 )
 from virtualization.models import VirtualMachine, ClusterGroup, Cluster
-from tenancy.models import *
+from tenancy.models import TenantGroup, Tenant
 
 __all__ = (
     'SystemFilterSet',
 )
-
 
 class SystemFilterSet(NetBoxModelFilterSet):
     

@@ -1,11 +1,14 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from netbox.forms import NetBoxModelForm, NetBoxModelFilterSetForm, NetBoxModelBulkEditForm, NetBoxModelImportForm
-from utilities.forms.fields import CommentField, DynamicModelChoiceField
-from utilities.forms import DatePicker, DynamicModelMultipleChoiceField, CSVModelForm, CSVModelChoiceField, CSVChoiceField
-from adestis_netbox_plugin_account_management.models import *
-from tenancy.models import *
-from django.utils.translation import gettext as _
+from utilities.forms.fields import CommentField, DynamicModelChoiceField, DynamicModelMultipleChoiceField, CSVChoiceField, CSVModelChoiceField, TagFilterField
+from utilities.forms.widgets import DatePicker
+from adestis_netbox_plugin_account_management.models.login_credentials import LoginCredentials, LoginCredentialsStatusChoices
+from adestis_netbox_plugin_account_management.models.system import System, SystemStatusChoices
+from tenancy.models import Contact
+from django.utils.translation import gettext_lazy as _
+from utilities.forms.rendering import FieldSet
+
 
 __all__ = (
     'LoginCredentialsForm',
@@ -29,7 +32,7 @@ class LoginCredentialsForm(NetBoxModelForm):
     )
 
     fieldsets = (
-        (None, ('logon_name', 'contact', 'system', 'login_credentials_status')),
+        (None, ('logon_name', 'contact', 'system', 'login_credentials_status', 'tags')),
         ('Validity', ('valid_from', 'valid_to')),
     )  
 
@@ -46,11 +49,19 @@ class LoginCredentialsForm(NetBoxModelForm):
         }
 
     def clean(self):
-        cleaned_data = super().clean()
-        valid_from_data = cleaned_data.get("valid_from")
-        valid_to_data = cleaned_data.get("valid_to")
+        super().clean()
 
-        if valid_from_data and valid_to_data:
+        fieldsToValidate = [
+            field for field in (
+                'valid_from', 'valid_to'
+            ) if self.cleaned_data[field]
+        ]
+
+        shouldValidate = len(fieldsToValidate)==2
+
+        if shouldValidate == True:
+            valid_from_data = self.cleaned_data["valid_from"]
+            valid_to_data = self.cleaned_data["valid_to"]
             # Only do something if both fields are valid so far.
             if valid_to_data < valid_from_data:
                 raise ValidationError(
@@ -107,17 +118,18 @@ class LoginCredentialsFilterForm(NetBoxModelFilterSetForm):
     model = LoginCredentials
     
     fieldsets = (
-        (None, ('q', 'index', 'contact_id', 'system', 'login_credentials_status')),
+        (None, ('q', 'index', 'tag', 'contact', 'system', 'login_credentials_status')),
     )  
 
     index = forms.IntegerField(
         required=False
     )
 
-    contact_id = DynamicModelMultipleChoiceField(
+    contact = DynamicModelMultipleChoiceField(
         queryset=Contact.objects.all(),
         required=False,
         null_option='None',
+        to_field_name='name',
         label=_('Contact')
     )
 
@@ -127,9 +139,11 @@ class LoginCredentialsFilterForm(NetBoxModelFilterSetForm):
     )
 
     login_credentials_status = forms.MultipleChoiceField(
-        choices=LoginCredentialsStatusChoices,
+        choices = LoginCredentialsStatusChoices,
         required=False
     )
+    
+    tag = TagFilterField(model)
     
     
 class LoginCredentialsCSVForm(NetBoxModelImportForm):

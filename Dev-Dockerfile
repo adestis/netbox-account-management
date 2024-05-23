@@ -1,5 +1,5 @@
 ARG FROM_IMAGE=netboxcommunity/netbox
-ARG FROM_TAG=v3.4-2.4.0
+ARG FROM_TAG=v4.0-2.9.1
 ARG FROM=${FROM_IMAGE}:${FROM_TAG}
 FROM ${FROM}
 
@@ -11,4 +11,4 @@ COPY ./setup.py /source/adestis-netbox-plugin-account-management/
 COPY ./MANIFEST.in /source/adestis-netbox-plugin-account-management/
 COPY ./README.md /source/adestis-netbox-plugin-account-management/
 
-RUN /opt/netbox/venv/bin/pip install --no-warn-script-location /source/adestis-netbox-plugin-account-management/
+RUN pip3 install --no-warn-script-location /source/adestis-netbox-plugin-account-management/

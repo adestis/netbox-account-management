@@ -1,18 +1,18 @@
-from adestis_netbox_plugin_account_management.models import *
+from adestis_netbox_plugin_account_management.models import LoginCredentials, LoginCredentialsStatusChoices, System, SystemStatusChoices
 from netbox.filtersets import NetBoxModelFilterSet
 from django.db.models import Q
 from django import forms
 import django_filters
 from django.utils.translation import gettext as _
-from utilities.forms import (
-    DynamicModelMultipleChoiceField, DatePicker,MultipleChoiceField, StaticSelect, TagFilterField, BOOLEAN_WITH_BLANK_CHOICES,
+from utilities.forms.fields import (
+    DynamicModelMultipleChoiceField
 )
-from tenancy.models import *
+from utilities.forms.widgets import DatePicker
+from tenancy.models import Contact
 
 __all__ = (
     'LoginCredentialsFilterSet',
 )
-
 
 class LoginCredentialsFilterSet(NetBoxModelFilterSet):
     
@@ -61,5 +61,7 @@ class LoginCredentialsFilterSet(NetBoxModelFilterSet):
             Q(logon_name__icontains=value) |
              Q(contact__name__icontains=value) |
             Q(login_credentials_status__icontains=value) |
-            Q(system__name__icontains=value) 
+            Q(system__name__icontains=value) |
+            Q(contact__name__icontains=value) 
+
         )

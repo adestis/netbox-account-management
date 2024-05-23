@@ -1,12 +1,13 @@
 from django import forms
 from netbox.forms import NetBoxModelForm, NetBoxModelFilterSetForm, NetBoxModelBulkEditForm, NetBoxModelImportForm
-from utilities.forms.fields import CommentField
-from adestis_netbox_plugin_account_management.models import *
-from django.utils.translation import gettext as _
 from tenancy.models import *
 from dcim.models import *
-from utilities.forms import DynamicModelChoiceField, DynamicModelMultipleChoiceField, CommentField, DatePicker, CSVModelForm, CSVModelChoiceField, CSVChoiceField
+from utilities.forms.fields import DynamicModelChoiceField, DynamicModelMultipleChoiceField, CSVModelChoiceField, CSVChoiceField, TagFilterField
 from virtualization.models import VirtualMachine, ClusterGroup, Cluster
+from adestis_netbox_plugin_account_management.models.login_credentials import LoginCredentials, LoginCredentialsStatusChoices
+from adestis_netbox_plugin_account_management.models.system import System, SystemStatusChoices
+from django.utils.translation import gettext_lazy as _
+from utilities.forms.rendering import FieldSet
 
 __all__ = (
     'SystemForm',
@@ -22,9 +23,6 @@ class SystemForm(NetBoxModelForm):
         queryset=TenantGroup.objects.all(),
         required=False,
         null_option='None',
-        initial_params={
-            'tenants': '$tenant'
-        }
     )
 
     tenant = DynamicModelChoiceField(
@@ -34,14 +32,10 @@ class SystemForm(NetBoxModelForm):
             'group_id': '$group'
         },
     )
-    
+
     cluster_group = DynamicModelChoiceField(
         queryset=ClusterGroup.objects.all(),
         required=False,
-        initial_params={
-            'tenant_id': '$tenant',
-            'group_id': '$group',
-        },
         null_option='None',
         help_text=_("Pin the system to a specific cluster group"),
     )
@@ -56,10 +50,14 @@ class SystemForm(NetBoxModelForm):
         help_text=_("Choose a cluster within the selected cluster group that contains the system"),
     )
     
+    
     device = DynamicModelChoiceField(
         queryset=Device.objects.all(),
         required=False,
         null_option='None',
+        query_params={
+            'cluster_id': '$cluster',
+        },
         help_text=_("Pin this system to a specific device within the selected cluster"),
     )
     
@@ -67,16 +65,18 @@ class SystemForm(NetBoxModelForm):
         queryset=VirtualMachine.objects.all(),
         required=False,
         null_option='None',
+        query_params={
+            'cluster_id': '$cluster',
+            'device_id': '$device',
+        },
         help_text=_("Pin this system to a specific virtual machine of the selected device"),
     )
-    
 
-    
     fieldsets = (
         ('System', ('name', 'system_url', 'system_status', 'tags')),
         ('Computing', ('group', 'tenant', 'cluster_group', 'cluster', 'device', 'virtual_machine')),
     )
-    
+
     class Meta:
         model = System
         fields = ('cluster_group', 'cluster', 'device', 'virtual_machine', 'name', 'system_url', 'group', 'tenant', 'system_status', 'comments', 'tags')
@@ -151,7 +151,7 @@ class SystemFilterForm(NetBoxModelFilterSetForm):
     model = System
     
     fieldsets = (
-        (None, ('q', 'system_url', 'system_status')),
+        (None, ('q', 'index', 'tag', 'system_url', 'system_status')),
         ('Computing', ('group_id', 'tenant_id', 'cluster_group_id', 'cluster_id', 'device_id', 'virtual_machine_id')),
     )   
 
@@ -222,6 +222,8 @@ class SystemFilterForm(NetBoxModelFilterSetForm):
         },
         label=_('Tenant')
     )
+    
+    tag = TagFilterField(model)
     
 
 class SystemCSVForm(NetBoxModelImportForm):
