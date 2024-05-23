@@ -2,30 +2,8 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-from adestis_netbox_plugin_account_management.models import *
-from tenancy.models import *
-
 
 class Migration(migrations.Migration):
-
-    def migrate_persons_to_contacts(apps, schema_editor):
-        persons = Person.objects.all()
-                
-        for person_migration in persons:
-            contact_name = person_migration.first_name + " " + person_migration.last_name
-
-            contact_contact = Contact.objects.create(name=contact_name, email=person_migration.mail_address)
-            
-            person_migration.contact = contact_contact
-            person_migration.save()
-            
-            person_credentials = LoginCredentials.objects.filter(person_id=person_migration.id)
-            
-            for credentials in person_credentials:
-                print(credentials.logon_name)
-                credentials.contact = contact_contact
-                credentials.save()
-
 
     dependencies = [
         ('tenancy', '0009_standardize_description_comments'),
@@ -35,5 +13,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(migrate_persons_to_contacts),
+
     ]

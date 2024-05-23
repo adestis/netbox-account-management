@@ -1,7 +1,7 @@
 from netbox.api.viewsets import NetBoxModelViewSet
 
 from adestis_netbox_plugin_account_management.filtersets import *
-from adestis_netbox_plugin_account_management.models import *
+from adestis_netbox_plugin_account_management.models import LoginCredentials, System
 from .serializers import *
 
 

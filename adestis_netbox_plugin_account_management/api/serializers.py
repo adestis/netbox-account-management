@@ -31,6 +31,7 @@ class LoginCredentialsSerializer(NetBoxModelSerializer):
     class Meta:
         model = LoginCredentials
         fields = '__all__'
+        brief_fields = '__all__'
         read_only_fields = ('contact', 'system')
 
 
@@ -66,4 +67,6 @@ class SystemSerializer(NetBoxModelSerializer):
     class Meta:
         model = System
         fields = ('id', 'url', 'display', 'name', 'system_url', 'system_status', 'device', 'virtual_machine', 'group', 'tenant', 'cluster_group', 'cluster', 'comments', 'tags',
+                  'custom_fields', 'created', 'last_updated')
+        brief_fields = ('id', 'url', 'display', 'name', 'system_url', 'system_status', 'device', 'virtual_machine', 'group', 'tenant', 'cluster_group', 'cluster', 'comments', 'tags',
                   'custom_fields', 'created', 'last_updated')

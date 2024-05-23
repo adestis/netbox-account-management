@@ -69,15 +69,7 @@ class LoginCredentials(NetBoxModel):
         verbose_name='Status',
         help_text='Status of the entry'
     )
-    
-    person = models.ForeignKey(
-                                to=Person,
-                                on_delete=models.SET_NULL,
-                                null=True,
-                                verbose_name='Person',
-                                help_text='User who uses the system')
-
-    
+       
     contact = models.ForeignKey(
         to='tenancy.Contact',
         on_delete=models.PROTECT,
